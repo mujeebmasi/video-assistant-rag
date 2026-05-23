@@ -26,5 +26,5 @@ def transcribe_all_chunks(chunks:list, translate:bool = False)-> str:
         text = transcribe_chunk(chunk, translate)
         full_transcription += text + "\n"
         print(f"Transcription for {chunk}:\n{text}\n")
-        chunk_number += 1
+        chunk_number = chunk_number + 1
     return full_transcription
