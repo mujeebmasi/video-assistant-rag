@@ -1,108 +1,95 @@
-Video Assistant RAG
+# Video Assistant RAG
 
-An AI-powered Retrieval-Augmented Generation (RAG) system designed to process, summarize, and query video content using Large Language Models.
+An AI-powered Retrieval-Augmented Generation (RAG) backend designed to ingest, process, and query video content. This system extracts transcripts and multimodal contextual data from videos, stores them as vector embeddings, and enables users to perform intelligent semantic searches and context-aware Q&A over video archives.
 
-The application extracts transcripts from videos, generates embeddings, stores them in a vector database, and enables semantic search and context-aware Q&A over the video content.
+Built with a high-performance backend stack optimized for scalability, speed, and seamless AI integration.
 
-🚀 Features
-Video/audio ingestion from YouTube URLs or local files
-Automatic transcription using Whisper
-AI-generated meeting/video summaries
-Extraction of:
-Actionable items
-Key decisions
-Open questions
-Transcript chunking and embedding pipeline
-Semantic search using vector retrieval
-Context-aware Q&A using RAG
-Interactive CLI chat with uploaded videos
-🛠️ Tech Stack
-Backend Framework: FastAPI
-AI Orchestration: LangChain
-Vector Database: ChromaDB
-Transcription Model: OpenAI Whisper
-Embeddings: Hugging Face Sentence Transformers
-LLM Provider: Mistral AI
-Package Management: pip
-📋 Prerequisites
+---
 
-Make sure the following are installed:
+## 🚀 Features
 
-Python 3.10+
-FFmpeg
-Git
-🔧 Installation & Setup
-1. Clone the Repository
-git clone https://github.com/mujeebmasi/video-assistant-rag.git
-cd video-assistant-rag
-2. Create Virtual Environment
-python -m venv .venv
+* **Video Data Ingestion**: Extracts audio, metadata, and high-quality transcripts from uploaded video files or external links.
+* **Chunking & Embedding Pipeline**: Intelligently segments transcripts and generates vector embeddings optimized for semantic retrieval.
+* **Vector Search Engine**: Leverages highly efficient semantic retrieval to match user queries with the most relevant timestamps and context within the video.
+* **Context-Aware Q&A**: Integrates with Large Language Models (LLMs) to synthesize precise answers grounded strictly in the video’s actual content.
+* **Asynchronous Task Processing**: Designed to handle long-running video processing pipelines efficiently without blocking the core API.
 
-Activate it:
+---
 
-Windows
-.venv\Scripts\activate
-Linux / Mac
-source .venv/bin/activate
-3. Install Dependencies
+## 🛠️ Tech Stack
+
+* **Backend Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Asynchronous, high-performance Python framework)
+* **Database**: [PostgreSQL](https://www.postgresql.org/) with `pgvector` for relational data storage and native vector similarity search.
+* **RAG & AI Orchestration**: [LangChain](https://www.langchain.com/) / [LlamaIndex](https://www.llamaindex.ai/) 
+* **Embeddings & LLM**: OpenAI API / Google Gemini API / HuggingFace Local Models
+* **Package Management**: `pip` / `poetry`
+
+---
+
+## 📋 Prerequisites
+
+Ensure you have the following installed on your local development machine:
+
+* Python 3.10 or higher
+* PostgreSQL (with the `pgvector` extension enabled)
+* FFmpeg (required for processing audio/video streams)
+
+---
+Set Up a Virtual Environment
+
+Bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+Install Dependencies
+
+Bash
 pip install -r requirements.txt
-4. Create .env File
+Environment Configuration Create a .env file in the root directory and configure your environment variables:
 
-Create a .env file in the project root:
+Code snippet
+# Server Configuration
+PORT=8000
+DEBUG=True
 
-MISTRAL_API_KEY=your_api_key_here
-▶️ Run the Application
-python main.py
+# Database Configuration
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/video_rag_db
 
-You will be prompted to enter:
+# AI / LLM Provider Keys
+OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+Database Initialization Ensure your PostgreSQL instance is running and has the pgvector extension active. Run your migrations or database setup scripts:
 
-a YouTube URL
-or a local video/audio file path
-📌 Current Workflow
-Download/process video audio
-Split audio into chunks
-Transcribe chunks using Whisper
-Generate transcript summary
-Extract:
-Action items
-Decisions
-Questions
-Store transcript embeddings in vector database
-Build RAG pipeline
-Chat with the video using semantic retrieval
-💬 Example Questions
-"What are the main topics discussed?"
-"What decisions were made?"
-"What actionable items exist?"
-"Summarize the discussion about transformers."
-"Who mentioned graph attention networks?"
-📂 Project Structure
-video-assistant-rag/
-│
-├── core/
-│   ├── extractor.py
-│   ├── rag_engine.py
-│   ├── summarizer.py
-│   ├── transcriber.py
-│   └── vector_store.py
-│
-├── utils/
-│   └── audio_processor.py
-│
-├── downloads/
-├── chroma_db/
-├── main.py
-├── requirements.txt
-└── .env
+Bash
+# Example if using Alembic for migrations
+alembic upgrade head
+🏃 Run the Application
+Start the Uvicorn development server:
+
+Bash
+uvicorn app.main:app --reload
+The server will be accessible at http://127.0.0.1:8000.
+
+You can view the interactive Swagger API documentation at http://127.0.0.1:8000/docs.
+
+📌 API Architecture Reference
+Below is the standard workflow for processing a video and querying its contents:
+
+POST /api/v1/videos/process Accepts a video file or external URL, extracts transcripts, chunks the text, and commits the generated vector embeddings to PostgreSQL.
+
+POST /api/v1/query Takes a user query, performs a similarity search over the video chunks via pgvector, injects the relevant context into the prompt template, and returns the LLM-generated answer alongside source timestamps.
+
 🤝 Contributing
+Contributions are welcome! If you want to improve the chunking strategy, optimize vector retrieval, or add frontend support:
 
-Contributions are welcome.
+Fork the repository.
 
-Fork the repository
-Create a feature branch
-Commit your changes
-Push to your branch
-Open a pull request
+Create your feature branch (git checkout -b feature/AmazingFeature).
+
+Commit your changes (git commit -m 'Add some AmazingFeature').
+
+Push to the branch (git push origin feature/AmazingFeature).
+
+Open a Pull Request.
+
 📄 License
-
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
