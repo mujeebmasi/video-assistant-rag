@@ -1,4 +1,4 @@
-# Video Assistant RAG
+# Video Assistant RAG.
 
 An AI-powered Retrieval-Augmented Generation (RAG) backend designed to ingest, process, and query video content. This system extracts transcripts and multimodal contextual data from videos, stores them as vector embeddings, and enables users to perform intelligent semantic searches and context-aware Q&A over video archives.
 
