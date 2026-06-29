@@ -24,3 +24,7 @@ pandas
 unstructured
 sentencepiece
 accelerate
+fastapi
+uvicorn[standard]
+python-multipart
+protobuf==3.20.3
