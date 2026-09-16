@@ -76,8 +76,4 @@ def generate_title(transcipt : str) -> str:
         |StrOutputParser()
     )
 
-<<<<<<< HEAD
     return title_chain.invoke(transcipt[:2000])
-=======
-    return title_chain.invoke(transcipt[:2000])
->>>>>>> cbc03fc (fixed vector store in github)

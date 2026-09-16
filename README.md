@@ -1,74 +1,108 @@
-<<<<<<< HEAD
-# Video Assistant RAG.
-
-An AI-powered Retrieval-Augmented Generation (RAG) backend designed to ingest, process, and query video content. This system extracts transcripts and multimodal contextual data from videos, stores them as vector embeddings, and enables users to perform intelligent semantic searches and context-aware Q&A over video archives.
-
-Built with a high-performance backend stack optimized for scalability, speed, and seamless AI integration.
-
----
-
-## 🚀 Features
-
-* **Video Data Ingestion**: Extracts audio, metadata, and high-quality transcripts from uploaded video files or external links.
-* **Chunking & Embedding Pipeline**: Intelligently segments transcripts and generates vector embeddings optimized for semantic retrieval.
-* **Vector Search Engine**: Leverages highly efficient semantic retrieval to match user queries with the most relevant timestamps and context within the video.
-* **Context-Aware Q&A**: Integrates with Large Language Models (LLMs) to synthesize precise answers grounded strictly in the video’s actual content.
-* **Asynchronous Task Processing**: Designed to handle long-running video processing pipelines efficiently without blocking the core API.
-
----
-
-## 🛠️ Tech Stack
-
-* **Backend Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Asynchronous, high-performance Python framework)
-* **Database**: [PostgreSQL](https://www.postgresql.org/) with `pgvector` for relational data storage and native vector similarity search.
-* **RAG & AI Orchestration**: [LangChain](https://www.langchain.com/) / [LlamaIndex](https://www.llamaindex.ai/) 
-* **Embeddings & LLM**: Mistral API / Google Gemini API / HuggingFace Local Models
-* **Package Management**: `pip` / `poetry`
-
----
-
-## 📋 Prerequisites
-
-Ensure you have the following installed on your local development machine:
-
-* Python 3.10 or higher
-* PostgreSQL (with the `pgvector` extension enabled)
-* FFmpeg (required for processing audio/video streams)
-
-=======
 # AI Meeting Assistant
 
-This workspace now has a simple React frontend and a FastAPI backend.
+Turn a YouTube link, an uploaded recording, or a local media file into a
+transcript, a summary, action items, decisions, open questions, and a chatbot
+you can ask questions about the conversation.
+
+## How it works
+
+1. `utils/audio_processor.py` downloads the audio with `yt-dlp` (or converts a
+   local file), resamples it to mono 16 kHz, and splits it into 10-minute chunks.
+2. `core/transcriber.py` runs OpenAI Whisper locally over each chunk.
+3. `core/summarizer.py` summarizes the transcript map-reduce style: summarize
+   each chunk, then combine those partial summaries into one.
+4. `core/extractor.py` pulls out action items, decisions, and open questions.
+5. `core/vector_store.py` splits the transcript into 500-character chunks,
+   embeds them with a local HuggingFace model, and stores them in Chroma.
+6. `core/rag_engine.py` retrieves the 5 most relevant chunks for a question and
+   asks Mistral to answer using only those.
+
+Each analysed video gets its own Chroma collection, so chunks from one video
+never leak into answers about another.
+
+## Tech stack
+
+- **Transcription**: OpenAI Whisper (runs locally, no API needed)
+- **LLM**: Mistral (`mistral-small-latest`) via LangChain
+- **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2`, run locally
+- **Vector store**: Chroma, persisted to `vector_db/`
+- **API**: FastAPI
+- **Frontend**: React with Vite
+- **Also included**: a Streamlit version in `app.py`, and a CLI in `main.py`
 
 ## What is where
-- `frontend/` - React UI built with Vite
-- `backend/` - FastAPI API that runs the existing transcript pipeline
-- `PRIVATE/` - snapshot of the old Python app and Streamlit version so you can still inspect the original code
 
-## Run the backend
-1. Install Python dependencies from `requirements.txt`
-2. Start the API server:
+- `core/` - transcription, summarizing, extraction, vector store, RAG chain
+- `utils/` - audio download and preprocessing
+- `backend/` - FastAPI API wrapping the pipeline
+- `frontend/` - React UI
+- `main.py` - command line version
+- `app.py` - Streamlit version
+
+## Prerequisites
+
+- Python 3.10 or higher
+- FFmpeg on your PATH (Whisper and pydub both need it)
+- Node.js 18 or higher, for the frontend
+
+## Setup
+
+Create a `.env` file in the project root:
+
+```
+MISTRAL_API_KEY=your_key_here
+```
+
+Optional settings:
+
+- `WHISPER_MODEL` - Whisper size to load, defaults to `small`
+- `USE_CUDA` - set to `true` to run embeddings on a GPU
+
+Install the Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Run the API
 
 ```bash
 uvicorn backend.app:app --reload
 ```
 
+Endpoints:
+
+- `GET /health`
+- `POST /analyze` - form fields `source_type` (`url`, `upload`, or `local`),
+  `source_value`, and an optional `file`. Returns a `session_id` plus the
+  transcript, summary, and extracted items.
+- `POST /chat/{session_id}` - JSON body `{"question": "..."}`
+- `DELETE /chat/{session_id}` - drop the session
+
 ## Run the frontend
-1. Go into `frontend/`
-2. Install Node dependencies:
 
 ```bash
+cd frontend
 npm install
-```
-
-3. Start the React app:
-
-```bash
 npm run dev
 ```
 
-## How it works
-- The frontend sends a YouTube link, local path, or uploaded file to FastAPI.
-- FastAPI reuses the existing `core/` pipeline to transcribe, summarize, and build the RAG chain.
-- Chat questions go back to the backend, which answers using the stored RAG session.
->>>>>>> cbc03fc (fixed vector store in github)
+## Run without the API
+
+Command line:
+
+```bash
+python main.py
+```
+
+Streamlit:
+
+```bash
+streamlit run app.py
+```
+
+## Note on chat sessions
+
+The API keeps RAG chains in a plain dictionary in memory, so sessions are lost
+when the server restarts. That is fine for local use; a real deployment would
+store the collection name and rebuild the chain on demand.
