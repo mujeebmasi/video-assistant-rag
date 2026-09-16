@@ -1,8 +1,27 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Downloaded / generated media
 downloads/
 *.wav
 *.mp3
 *.mp4
 *.webm
-__pycache__/
-.venv/
-.env
+
+# Chroma vector database (rebuilt on every run)
+vector_db/
+
+# Local scratch copy, not part of the project
+PRIVATE/
